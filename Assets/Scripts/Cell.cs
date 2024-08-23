@@ -3,32 +3,35 @@ using UnityEngine.UI;
 
 public class Cell : MonoBehaviour
 {
-    [SerializeField] private Image[] _cells;
+    [SerializeField] private Sprite[] _sprites;
+       
+    private Board _board;
+
+    private int _cellNumber;
+    private int _rowNumber;
+
+    public int CellNumber => _cellNumber;
+    public int RowNumber => _rowNumber;
 
     private void Start()
     {
-        Initialize();
+        _board = GetComponentInParent<Board>();
+
+        Image image = GetComponent<Image>();
+
+        SetRandomSprite(image);
     }
 
-    private void Initialize()
+    public void GetAddress(int rowNumber, int cellNumber)
     {
-        int randomCell = Random.Range(0, _cells.Length);
-
-        Image cell = Instantiate(_cells[randomCell], transform);
-        RectTransform cellRectTransform = cell.GetComponent<RectTransform>();
-
-        SetupRectTransform(cellRectTransform);
-
-        cell.name = this.name;
+        _cellNumber = cellNumber;
+        _rowNumber = rowNumber;
     }
 
-    private void SetupRectTransform(RectTransform rectTransform)
+    public void SetRandomSprite(Image image)
     {
-        rectTransform.anchorMin = new Vector2(0, 0);
-        rectTransform.anchorMax = new Vector2(1, 1);
-        rectTransform.offsetMin = new Vector2(0, 0);
-        rectTransform.offsetMax = new Vector2(0, 0);
-        rectTransform.localPosition = Vector3.zero;
-        rectTransform.localScale = Vector3.one;
+        int randomIndex = Random.Range(0, _sprites.Length);
+
+        image.sprite = _sprites[randomIndex];
     }
 }
