@@ -4,17 +4,20 @@ using UnityEngine.UI;
 public class Cell : MonoBehaviour
 {
     [SerializeField] private Sprite[] _sprites;
-       
+
     private Board _board;
 
     private int _cellNumber;
     private int _rowNumber;
+
+    public bool IsVisited; 
 
     public int CellNumber => _cellNumber;
     public int RowNumber => _rowNumber;
 
     private void Start()
     {
+        IsVisited = false;
         _board = GetComponentInParent<Board>();
 
         Image image = GetComponent<Image>();
