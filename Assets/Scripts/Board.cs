@@ -1,114 +1,40 @@
-using System;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
-[RequireComponent(typeof(CellsHandler))] 
 public class Board : MonoBehaviour
 {
-    [SerializeField] private int _rowsNumber;
-    [SerializeField] private int _columnsNumber;
-
+    [SerializeField] private int _rows;
+    [SerializeField] private int _columns;
+    [SerializeField] private Cell _cellPrefab;
     [SerializeField] private Row _rowPrefab;
-
-    public int RowsNumber => _rowsNumber;
-    public int ColumnNumber => _columnsNumber;
-
-    private CellsHandler _cellsHandler;
-    private Cell[,] _cells;
+    [SerializeField] private ColorRandomiser _colorRandomiser;
+        
+    private Cell[,] _cells;  
 
     private void Awake()
     {
-        _cellsHandler = GetComponent<CellsHandler>();
-        _cells = new Cell[_columnsNumber, _rowsNumber];
-
-        InitializeCells();
-        _cellsHandler.GetCells(_cells);
-    }
-    private void Start()
-    {
-        StartCoroutine(ChangeSameColorDeleyed());
+        InstantiateCells();
+        RegisterCells();
     }
 
-    public void GetNewCell(Cell cell)
+    private void InstantiateCells()
     {
-        _cells[cell.CellNumber, cell.RowNumber] = cell;
-
-        Button button = cell.GetComponent<Button>();
-
-        if (button != null)
+        for (int i = 0; i < _rows; i++)
         {
-            button.onClick.AddListener(() => OnCellClicked(cell));
+            Row newRow = Instantiate(_rowPrefab, transform);
+            newRow.transform.SetParent(transform, false);
+            newRow.GetRowNumber(i);
+            newRow.InstantiateCells(_columns, _cellPrefab, _colorRandomiser);
         }
     }
 
-    public IEnumerator ChangeSameColorDeleyed()
-    {
-        WaitForSeconds waitForSeconds = new WaitForSeconds(0.1f);
+    private void RegisterCells()
+    {        
+        Cell[] cellsChildren = GetComponentsInChildren<Cell>();
+        _cells = new Cell[_columns, _rows];
 
-        yield return waitForSeconds;
-
-        ChangeColor();
-    }
-
-    private void OnCellClicked(Cell cell)
-    {
-        _cellsHandler.OnClicked(cell);
-    }
-
-    private void InitializeCells()
-    {
-        for (int i = 0; i < _rowsNumber; i++)
+        foreach (Cell cell in cellsChildren)
         {
-            Row row = Instantiate(_rowPrefab);
-            row.transform.SetParent(this.transform, false);
-            row.GetCellNumber(i, _columnsNumber);
+            _cells[cell.Column, cell.Row] = cell;
         }
-    }
-
-    private void ChangeColor()
-    {
-        bool[,] checkedCells = new bool[_columnsNumber, _rowsNumber];
-
-        for (int i = 0; i < _columnsNumber; i++)
-        {
-            for (int j = 0; j < _rowsNumber; j++)
-            {
-                if (!checkedCells[i, j])
-                {
-                    int verticalMatchCount = 1;
-                    int horizontalMatchCount = 1;
-
-                    for (int k = j + 1; k < _rowsNumber && _cells[i, k].GetComponent<Image>().sprite.name == _cells[i, j].GetComponent<Image>().sprite.name; k++)
-                    {
-                        verticalMatchCount++;
-                    }
-
-                    for (int k = i + 1; k < _columnsNumber && _cells[k, j].GetComponent<Image>().sprite.name == _cells[i, j].GetComponent<Image>().sprite.name; k++)
-                    {
-                        horizontalMatchCount++;
-                    }
-
-                    if (verticalMatchCount >= 3 || horizontalMatchCount >= 3)
-                    {
-                        string spriteName = _cells[i, j].GetComponent<Image>().sprite.name;
-
-                        for (int k = j; k < j + verticalMatchCount; k++)
-                        {
-                            _cells[i, k].SetRandomSprite(_cells[i, k].GetComponent<Image>());
-                            checkedCells[i, k] = true;
-                        }
-
-                        for (int k = i; k < i + horizontalMatchCount; k++)
-                        {
-                            _cells[k, j].SetRandomSprite(_cells[k, j].GetComponent<Image>());
-                            checkedCells[k, j] = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        Array.Clear(checkedCells, 0, checkedCells.Length);
     }
 }

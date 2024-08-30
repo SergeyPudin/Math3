@@ -3,15 +3,7 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags:
-  - ship
-  - asteroid
-  - Red
-  - Orange
-  - Yellow
-  - Green
-  - Blue
-  - Purple
+  tags: []
   layers:
   - Default
   - TransparentFX
